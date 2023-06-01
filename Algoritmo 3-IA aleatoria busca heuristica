@@ -1,6 +1,5 @@
 import random
 
-# Função para exibir o tabuleiro
 def exibir_tabuleiro(tabuleiro):
     print("-------------")
     for i in range(3):
@@ -9,19 +8,15 @@ def exibir_tabuleiro(tabuleiro):
             print(tabuleiro[i][j], end=" | ")
         print("\n-------------")
 
-# Função para verificar se o jogador ganhou
 def verificar_vitoria(tabuleiro, jogador):
-    # Verificar linhas
     for i in range(3):
         if tabuleiro[i][0] == tabuleiro[i][1] == tabuleiro[i][2] == jogador:
             return True
 
-    # Verificar colunas
     for i in range(3):
         if tabuleiro[0][i] == tabuleiro[1][i] == tabuleiro[2][i] == jogador:
             return True
 
-    # Verificar diagonais
     if tabuleiro[0][0] == tabuleiro[1][1] == tabuleiro[2][2] == jogador:
         return True
     if tabuleiro[0][2] == tabuleiro[1][1] == tabuleiro[2][0] == jogador:
@@ -29,11 +24,9 @@ def verificar_vitoria(tabuleiro, jogador):
 
     return False
 
-# Função para verificar se há empate
 def verificar_empate(tabuleiro):
     return ' ' not in [celula for linha in tabuleiro for celula in linha]
 
-# Função para fazer a jogada do jogador humano
 def fazer_jogada(tabuleiro, jogador):
     while True:
         linha = int(input("Digite o número da linha (0-2): "))
@@ -50,8 +43,28 @@ def fazer_jogada(tabuleiro, jogador):
         tabuleiro[linha][coluna] = jogador
         break
 
-# Função para fazer a jogada da IA (Aleatória)
-def fazer_jogada_ia(tabuleiro, jogador):
+def fazer_jogada_ia_heuristica(tabuleiro, jogador):
+    for i in range(3):
+        for j in range(3):
+            if tabuleiro[i][j] == ' ':
+                tabuleiro[i][j] = jogador
+                if verificar_vitoria(tabuleiro, jogador):
+                    return
+                tabuleiro[i][j] = ' '
+
+    jogador_humano = 'O' if jogador == 'X' else 'X'
+    for i in range(3):
+        for j in range(3):
+            if tabuleiro[i][j] == ' ':
+                tabuleiro[i][j] = jogador_humano
+                if verificar_vitoria(tabuleiro, jogador_humano):
+                    tabuleiro[i][j] = jogador
+                    return
+                tabuleiro[i][j] = ' '
+
+    fazer_jogada_ia_aleatoria(tabuleiro, jogador)
+
+def fazer_jogada_ia_aleatoria(tabuleiro, jogador):
     while True:
         linha = random.randint(0, 2)
         coluna = random.randint(0, 2)
@@ -60,7 +73,6 @@ def fazer_jogada_ia(tabuleiro, jogador):
             tabuleiro[linha][coluna] = jogador
             break
 
-# Função principal do jogo
 def jogar_jogo_da_velha():
     tabuleiro = [[' ' for _ in range(3)] for _ in range(3)]
     jogadores = ['X', 'O']
@@ -73,7 +85,7 @@ def jogar_jogo_da_velha():
         if jogador_atual == 'X':
             fazer_jogada(tabuleiro, jogador_atual)
         else:
-            fazer_jogada_ia(tabuleiro, jogador_atual)
+            fazer_jogada_ia_heuristica(tabuleiro, jogador_atual)
 
         if verificar_vitoria(tabuleiro, jogador_atual):
             exibir_tabuleiro(tabuleiro)
@@ -86,5 +98,4 @@ def jogar_jogo_da_velha():
 
         jogador_atual = 'O' if jogador_atual == 'X' else 'X'
 
-# Iniciar o jogo
 jogar_jogo_da_velha()
