@@ -1,0 +1,138 @@
+import random
+
+# Função para exibir o tabuleiro
+def exibir_tabuleiro(tabuleiro):
+    print("-------------")
+    for i in range(3):
+        print("|", end=" ")
+        for j in range(3):
+            print(tabuleiro[i][j], end=" | ")
+        print("\n-------------")
+
+# Função para verificar se o jogador ganhou
+def verificar_vitoria(tabuleiro, jogador):
+    # Verificar linhas
+    for i in range(3):
+        if tabuleiro[i][0] == tabuleiro[i][1] == tabuleiro[i][2] == jogador:
+            return True
+
+    # Verificar colunas
+    for i in range(3):
+        if tabuleiro[0][i] == tabuleiro[1][i] == tabuleiro[2][i] == jogador:
+            return True
+
+    # Verificar diagonais
+    if tabuleiro[0][0] == tabuleiro[1][1] == tabuleiro[2][2] == jogador:
+        return True
+    if tabuleiro[0][2] == tabuleiro[1][1] == tabuleiro[2][0] == jogador:
+        return True
+
+    return False
+
+# Função para verificar se há empate
+def verificar_empate(tabuleiro):
+    return ' ' not in [celula for linha in tabuleiro for celula in linha]
+
+# Função para fazer a jogada do jogador humano
+def fazer_jogada(tabuleiro, jogador):
+    while True:
+        linha = int(input("Digite o número da linha (0-2): "))
+        coluna = int(input("Digite o número da coluna (0-2): "))
+
+        if linha < 0 or linha > 2 or coluna < 0 or coluna > 2:
+            print("Jogada inválida! Tente novamente.")
+            continue
+
+        if tabuleiro[linha][coluna] != ' ':
+            print("Posição ocupada! Tente novamente.")
+            continue
+
+        tabuleiro[linha][coluna] = jogador
+        break
+
+# Função para fazer a jogada da IA (Minimax)
+def fazer_jogada_ia(tabuleiro, jogador):
+    # Cria uma cópia do tabuleiro para simular as jogadas
+    tabuleiro_copia = [linha.copy() for linha in tabuleiro]
+
+    # Função auxiliar do Minimax para determinar a melhor jogada
+    def minimax(tabuleiro, profundidade, maximizando):
+        # Verifica se o jogo chegou ao fim ou atingiu a profundidade máxima
+        if verificar_vitoria(tabuleiro, 'X'):
+            return -1  # Jogador X venceu
+        elif verificar_vitoria(tabuleiro, 'O'):
+            return 1  # Jogador O venceu
+        elif verificar_empate(tabuleiro):
+            return 0  # Empate
+
+        # Maximizando (IA)
+        if maximizando:
+            melhor_pontuacao = float('-inf')
+            for i in range(3):
+                for j in range(3):
+                    if tabuleiro[i][j] == ' ':
+                        tabuleiro[i][j] = jogador
+                        pontuacao = minimax(tabuleiro, profundidade + 1, False)
+                        tabuleiro[i][j] = ' '  # Desfaz a jogada
+
+                        melhor_pontuacao = max(pontuacao, melhor_pontuacao)
+            return melhor_pontuacao
+
+        # Minimizando (Jogador)
+        else:
+            melhor_pontuacao = float('inf')
+            for i in range(3):
+                for j in range(3):
+                    if tabuleiro[i][j] == ' ':
+                        tabuleiro[i][j] = jogador
+                        pontuacao = minimax(tabuleiro, profundidade + 1, True)
+                        tabuleiro[i][j] = ' '  # Desfaz a jogada
+
+                        melhor_pontuacao = min(pontuacao, melhor_pontuacao)
+            return melhor_pontuacao
+
+    # Seleciona a melhor jogada para a IA usando o algoritmo Minimax
+    melhor_pontuacao = float('-inf')
+    melhor_jogada = None
+    for i in range(3):
+        for j in range(3):
+            if tabuleiro_copia[i][j] == ' ':
+                tabuleiro_copia[i][j] = jogador
+                pontuacao = minimax(tabuleiro_copia, 0, False)
+                tabuleiro_copia[i][j] = ' '  # Desfaz a jogada
+
+                if pontuacao > melhor_pontuacao:
+                    melhor_pontuacao = pontuacao
+                    melhor_jogada = (i, j)
+
+    # Realiza a melhor jogada da IA
+    tabuleiro[melhor_jogada[0]][melhor_jogada[1]] = jogador
+
+# Função principal do jogo
+def jogar_jogo_da_velha():
+    tabuleiro = [[' ' for _ in range(3)] for _ in range(3)]
+    jogadores = ['X', 'O']
+    jogador_atual = random.choice(jogadores)
+
+    while True:
+        exibir_tabuleiro(tabuleiro)
+        print("Jogador atual:", jogador_atual)
+
+        if jogador_atual == 'X':
+            fazer_jogada(tabuleiro, jogador_atual)
+        else:
+            fazer_jogada_ia(tabuleiro, jogador_atual)
+
+        if verificar_vitoria(tabuleiro, jogador_atual):
+            exibir_tabuleiro(tabuleiro)
+            print("O jogador", jogador_atual, "venceu!")
+            break
+        elif verificar_empate(tabuleiro):
+            exibir_tabuleiro(tabuleiro)
+            print("O jogo terminou em empate!")
+            break
+
+        jogador_atual = 'O' if jogador_atual == 'X' else 'X'
+
+# Iniciar o jogo
+jogar_jogo_da_velha()1
